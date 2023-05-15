@@ -3,102 +3,92 @@
 #include <limits.h>
 #include <stdbool.h>
 
-#define oo 999999999
+#define INF 999999999
 
 typedef struct {
-    int first;
-    int second;
-} ii;
+    int first_node;
+    int second_node;
+} pair_t;
 
-/*
- * Computa a distância mínima entre todos os pares de vértices do grafo.
- * Função adaptada de Edson Alves (https://github.com/edsomjr/TEP/blob/master/Grafos/slides/floyd-warshall/floyd-warshall.pdf)
- */
-int** floyd_warshall(ii** adj, int N) {
-    int** dist = (int**)malloc((N + 1) * sizeof(int*));
-    for (int i = 0; i <= N; i++) {
-        dist[i] = (int*)malloc((N + 1) * sizeof(int));
-        for (int j = 0; j <= N; j++) {
-            dist[i][j] = oo;
+int** floyd_warshall(pair_t** adjacency, int cities) {
+    int** distance = (int**)malloc((cities + 1) * sizeof(int*));
+    for (int i = 0; i <= cities; i++) {
+        distance[i] = (int*)malloc((cities + 1) * sizeof(int));
+        for (int j = 0; j <= cities; j++) {
+            distance[i][j] = INF;
         }
     }
 
-    // A distância (horas gastas) entre um nó e ele mesmo é 0
-    for (int x = 1; x <= N; x++)
-        dist[x][x] = 0;
+    for (int x = 1; x <= cities; x++)
+        distance[x][x] = 0;
 
-    // Atualiza a distância entre as agências com acordos de envio de mensagens (arestas diretas)
-    for (int x = 1; x <= N; x++)
-        for (int i = 0; i < N; i++) {
-            int y = adj[x][i].first;
-            int h = adj[x][i].second;
+    for (int x = 1; x <= cities; x++)
+        for (int i = 0; i < cities; i++) {
+            int y = adjacency[x][i].first_node;
+            int h = adjacency[x][i].second_node;
             if (y != -1)
-                dist[x][y] = h;
+                distance[x][y] = h;
         }
 
-    // Calcula a menor distância entre todos os pares de vértices e salva em dist
-    for (int k = 1; k <= N; k++)
-        for (int x = 1; x <= N; x++)
-            for (int y = 1; y <= N; y++)
-                if (dist[x][k] < oo && dist[k][y] < oo)
-                    dist[x][y] = (dist[x][y] < dist[x][k] + dist[k][y]) ? dist[x][y] : dist[x][k] + dist[k][y];
+    for (int k = 1; k <= cities; k++)
+        for (int x = 1; x <= cities; x++)
+            for (int y = 1; y <= cities; y++)
+                if (distance[x][k] < INF && distance[k][y] < INF)
+                    distance[x][y] = (distance[x][y] < distance[x][k] + distance[k][y]) ? distance[x][y] : distance[x][k] + distance[k][y];
 
-    return dist;
+    return distance;
 }
 
 int main() {
-    int N;  // Número de cidades (Nós)
-    int E;  // Número de acordos de envios de mensagens (Arestas)
+    int cities;
+    int agreements;
 
-    // Loop termina quando N = E = 0
-    while (scanf("%d %d", &N, &E), N != 0 || E != 0) {
-        ii** graph = (ii**)malloc((N + 1) * sizeof(ii*));
-        for (int i = 0; i <= N; i++) {
-            graph[i] = (ii*)malloc(N * sizeof(ii));
-            for (int j = 0; j < N; j++) {
-                graph[i][j].first = -1;
-                graph[i][j].second = -1;
+    while (scanf("%d %d", &cities, &agreements), cities != 0 || agreements != 0) {
+        pair_t** graph = (pair_t**)malloc((cities + 1) * sizeof(pair_t*));
+        for (int i = 0; i <= cities; i++) {
+            graph[i] = (pair_t*)malloc(cities * sizeof(pair_t));
+            for (int j = 0; j < cities; j++) {
+                graph[i][j].first_node = -1;
+                graph[i][j].second_node = -1;
             }
         }
 
         int X, Y, H;
 
-        while (E--) {
+        while (agreements--) {
             scanf("%d %d %d", &X, &Y, &H);
 
-            // Checa se as agências estão na mesma cidade (Existe caminho de X -> Y e Y -> X)
             bool found = false;
-            for (int i = 0; i < N && !found; i++) {
-                if (graph[Y][i].first == X) {
+            for (int i = 0; i < cities && !found; i++) {
+                if (graph[Y][i].first_node == X) {
                         found = true;
-                        // Se as agências estão na mesma cidade, o tempo gasto (custo) para envio da carta é 0
-                        graph[Y][i].second = 0;
-                        graph[X][i].first = Y;
-                        graph[X][i].second = 0;
+                        graph[Y][i].second_node = 0;
+                        graph[X][i].first_node = Y;
+                        graph[X][i].second_node = 0;
                     }
                 }
                 if (!found) {
-                    for (int i = 0; i < N; i++) {
-                        if (graph[X][i].first == -1) {
-                            graph[X][i].first = Y;
-                            graph[X][i].second = H;
+                    for (int i = 0; i < cities; i++) {
+                        if (graph[X][i].first_node == -1) {
+                            graph[X][i].first_node = Y;
+                            graph[X][i].second_node = H;
                             break;
                         }
                     }
                 }
             }
 
-            int** dist = floyd_warshall(graph, N);
+            int** dist = floyd_warshall(graph, cities);
 
-            int K;     // Número de consultas
-            int O, D;  // Origem e destino das consultas
+            int queries;
+            int origin, destination;
 
-            scanf("%d", &K);
-            while (K--) {
-                scanf("%d %d", &O, &D);
+            scanf("%d", &queries);
+            while (queries--) {
+                scanf("%d %d", &origin, &destination);
 
-                if (dist[O][D] != oo)
-                    printf("%d\n", dist[O][D]);
+                if (dist[origin][destination] != INF)
+                    printf("%d\n", dist[origin][destination]);
                 else
                     printf("Nao e possivel entregar a carta\n");
             }
@@ -106,7 +96,7 @@ int main() {
             printf("\n");
 
             // Libera a memória alocada para o grafo e a matriz de distâncias
-            for (int i = 0; i <= N; i++) {
+            for (int i = 0; i <= cities; i++) {
                 free(graph[i]);
                 free(dist[i]);
             }
