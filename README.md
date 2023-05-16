@@ -24,3 +24,5 @@ Questões sobre grafos resolvidas em C, relacionadas ao conteúdo de menor camin
 * [Network Delay Time](https://leetcode.com/problems/network-delay-time/)
 
 ## Link Vídeo
+
+- [Vídeo de Apresentação](https://youtu.be/kOTR0ynsdYo)
