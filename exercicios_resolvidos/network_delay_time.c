@@ -68,22 +68,6 @@ graph *graphInit(int qtdVertices)
 
     return g;
 }
-void removeAresta(graph *g,aresta a)
-{
-    int v1 = a.vertice1;
-    int v2 = a.vertice2;
-
-    celula *c1 = g->listaDeAdjacencias[v1];
-
-    while(c1->prox->vertice != v2 && c1!= NULL)
-        c1 = c1->prox;
-
-    if(c1 == NULL) return; ///nao existe conexao
-
-    celula *novo1 = c1->prox;
-    c1->prox = novo1->prox;
-    free(novo1);
-}
 
 void insere_aresta_DIRECAO_UNICA(graph *g,aresta a)
 {
